@@ -41,6 +41,10 @@ def set(args)
 end
 
 def out(args)
+  if args.empty?
+    puts
+    return
+  end
   print(args[0].chr)
 end
 
@@ -48,6 +52,7 @@ def noop(*)
 end
 
 @pc = 0
+begin
 loop do
   seq = program[@pc].to_i(2)
   case seq
@@ -56,20 +61,24 @@ loop do
   when 0..32767
     if (0..21).include?(seq)
       if @op
-        send(@op, args)
+        send(@op, @args)
         # execute
       end
-      args = []
+      @args = []
       @op = opcodes[seq]
     else
-      args << seq
+      @args << seq
     end
   # registers
   when 32768..32775
     reg_index = (seq - 32768).to_s
-    args << reg_index
+    @args << reg_index
   else
     # invalid values
   end
   @pc += 1
+end
+rescue Exception => e
+  require 'pry'; binding.pry
+  puts
 end
